@@ -73,7 +73,7 @@ class DashboardController extends Controller
     {
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
             $this->em->remove($widget);
             $this->em->flush();
         }
@@ -88,7 +88,7 @@ class DashboardController extends Controller
     {
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
 
             $this->tryResetCache($widget);
 
@@ -112,7 +112,7 @@ class DashboardController extends Controller
     {
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
 
             $this->tryResetCache($widget);
 
@@ -133,7 +133,7 @@ class DashboardController extends Controller
         $response = new Response();
         $response->setContent("");
         
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
             $widgetType = $provider->getWidgetType($widget->getType());
 
             if ($widgetType) {
@@ -153,7 +153,7 @@ class DashboardController extends Controller
         $config = $request->request->get("form")["json_form_".$id];
         $widget = $this->em->getRepository(Widget::class)->find($id);
         
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
             $widget->setConfig($config);
             $this->em->flush();
         }
@@ -169,7 +169,7 @@ class DashboardController extends Controller
     {
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
-        if ($widget) {
+        if ($widget && $this->isAllowed($widget)) {
             $widget->setTitle(null);
             $widget->setConfig(null);
             $this->em->flush();
@@ -247,5 +247,15 @@ class DashboardController extends Controller
 
             $this->cache->delete($widgetType->getCacheKey());
         }
+    }
+
+    /**
+     * @param Widget $widget
+     * @return bool if current user can do things with this widget
+     */
+    private function isAllowed(Widget $widget): bool
+    {
+        $user_id = method_exists($this->getUser(), 'getId') ? $this->getUser()->getId() : null;
+        return $user_id === $widget->getUserId();
     }
 }
