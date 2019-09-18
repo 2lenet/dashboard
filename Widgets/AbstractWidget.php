@@ -228,4 +228,15 @@ abstract class AbstractWidget implements WidgetTypeInterface
     {
         return "widget_cache_" . $this->getId();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function tryResetCache(): void
+    {
+        $cache = new FilesystemAdapter();
+        if ($cache->hasItem($this->getCacheKey())) {
+            $cache->delete($this->getCacheKey());
+        }
+    }
 }

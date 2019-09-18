@@ -90,4 +90,9 @@ interface WidgetTypeInterface
      * Returns default cache key for transformResponse.
      */
     public function getCacheKey(): ?string;
+
+    /**
+     * Reset widget cache created by default transformResponse behaviour
+     */
+    public function tryResetCache(): void;
 }

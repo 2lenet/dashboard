@@ -243,9 +243,8 @@ class DashboardController extends Controller
         $widgetType = $widgetProvider->getWidgetType($widget->getType())->setId($widget->getId());
 
         // If it's in the cache, delete it.
-        if ($widgetType && $this->cache->hasItem($widgetType->getCacheKey())) {
-
-            $this->cache->delete($widgetType->getCacheKey());
+        if ($widgetType) {
+            $widgetType->tryResetCache();
         }
     }
 
