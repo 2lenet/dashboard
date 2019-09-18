@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 use Tkuska\DashboardBundle\Entity\Widget;
+use Tkuska\DashboardBundle\Widgets\AbstractWidget;
 
 
 /**
@@ -61,7 +62,7 @@ class WidgetProvider
      * @param string $widget_type
      * @return Widget\WidgetTypeInterface
      */
-    public function getWidgetType($widget_type)
+    public function getWidgetType($widget_type): ?AbstractWidget
     {
         if (array_key_exists($widget_type, $this->widgetTypes)) {
             return clone $this->widgetTypes[$widget_type];

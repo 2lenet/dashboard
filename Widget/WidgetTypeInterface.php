@@ -85,4 +85,9 @@ interface WidgetTypeInterface
      * By default, it caches the widget for 300 seconds. Make sure to not cache editable widgets, such as post-its.
      */
     public function transformResponse(Response $response): Response;
+
+    /**
+     * Returns default cache key for transformResponse.
+     */
+    public function getCacheKey(): ?string;
 }

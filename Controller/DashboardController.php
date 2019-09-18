@@ -3,6 +3,7 @@
 namespace Tkuska\DashboardBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,10 +29,16 @@ class DashboardController extends Controller
      */
     private $tokenStorage;
 
+    /**
+     * @var FilesystemAdapter
+     */
+    private $cache;
+
     public function __construct(EntityManagerInterface $em, TokenStorageInterface $tokenStorage)
     {
         $this->em = $em;
         $this->tokenStorage = $tokenStorage;
+        $this->cache = new FilesystemAdapter();
     }
 
     /**
@@ -82,6 +89,9 @@ class DashboardController extends Controller
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
         if ($widget) {
+
+            $this->tryResetCache($widget);
+
             $widget
                 ->setX($x)
                 ->setY($y)
@@ -103,6 +113,9 @@ class DashboardController extends Controller
         $widget = $this->em->getRepository(Widget::class)->find($id);
 
         if ($widget) {
+
+            $this->tryResetCache($widget);
+
             $widget->setTitle($title);
             $this->em->flush();
         }
@@ -212,5 +225,27 @@ class DashboardController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * @param Widget $widget the widget
+     * Default behaviour of AbstractWidget is caching the widgets for 5 min.
+     * But when we update the widget, we want to invalidate the cache to take into account user's changes
+     */
+    private function tryResetCache(Widget $widget)
+    {
+        if (null === $widget) {
+            return;
+        }
+
+        // Get associated abstract widget
+        $widgetProvider = $this->get(WidgetProvider::class);
+        $widgetType = $widgetProvider->getWidgetType($widget->getType())->setId($widget->getId());
+
+        // If it's in the cache, delete it.
+        if ($widgetType && $this->cache->hasItem($widgetType->getCacheKey())) {
+
+            $this->cache->delete($widgetType->getCacheKey());
+        }
     }
 }

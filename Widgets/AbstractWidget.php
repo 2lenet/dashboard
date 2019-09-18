@@ -210,8 +210,7 @@ abstract class AbstractWidget implements WidgetTypeInterface
     public function transformResponse(Response $response): Response
     {
         $cache = new FilesystemAdapter();
-        $uniqueKey = "widget_cache_" . $this->getId();
-        $response = $cache->get($uniqueKey, function (ItemInterface $item) use ($response) {
+        $response = $cache->get($this->getCacheKey(), function (ItemInterface $item) use ($response) {
 
             // 5 minutes
             $item->expiresAfter(300);
@@ -220,5 +219,13 @@ abstract class AbstractWidget implements WidgetTypeInterface
         });
 
         return $response;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCacheKey(): string
+    {
+        return "widget_cache_" . $this->getId();
     }
 }
